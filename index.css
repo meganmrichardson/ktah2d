@@ -1,1 +1,14 @@
+body {
+ background-color: rgb(190,210,255);
+}
 
+h1 {
+  font-family: 'Unlock', cursive;
+  color: rgb(220, 20, 10);
+  font-size: 40px;
+  line-height: 6px;
+}
+
+p {
+  font-family: avenir;
+}
