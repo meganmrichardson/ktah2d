@@ -38,16 +38,31 @@ function updateScarecrow() {
     scarecrow.ttl--;
     if (scarecrow.ttl < 0) {
       scarecrow = undefined;
-      cooldown = time;
+      scarecrowCooldown = time;
     }
   } else {
     fill("white");
-    rect(10, 10, time - cooldown < 10 ? 15 * (time - cooldown) : 150, 10);
-    if (time - cooldown > 10) {
+    rect(10, 10, time - scarecrowCooldown < 10 ? 15 * (time - scarecrowCooldown) : 150, 10);
+    if (time - scarecrowCooldown > 10) {
       fill("grey");
       textSize(15);
       textAlign(LEFT);
       text("Click to use bait!", 10, 40);
+    }
+  }
+}
+
+class healthbox {
+  constructor(x, y) {
+    Object.assign(this, {x, y});
+  }
+  update() {
+    ellipse(this.x, this.y, 200, 200);
+    let [dx, dy] = [this.x - player.x, this.y - player.y];
+    const distance = Math.hypot(dx, dy);
+    let overlap = 200 + player.radius - distance;
+    if (overlap > 0) {
+      
     }
   }
 }
@@ -174,8 +189,9 @@ class enemy {
 
 const player = new mainCharacter(100, 30, "orange", 10, 0.05);
 let enemies = [];
+let healthboxes = [];
 let scarecrow;
-let cooldown = 0;
+let scarecrowCooldown = 0;
 
 function addEnemy(
   type,
@@ -191,6 +207,12 @@ function addEnemy(
   }
 }
 
+function drawSky(){
+  let wallHeight = 0;
+  fill("black");
+  rect(0, 0, width, time * 3);
+}
+
 function setup() {
   createCanvas(800, 600);
   noStroke();
@@ -198,6 +220,7 @@ function setup() {
   addEnemy("shark", 1, [300, 300], 30, 0.01);
   addEnemy("starfish", 3, [100, 100], 15, 0.03);
   addEnemy("jellyfish", 1, [500, 500], 15, 0.035);
+  addEnemy("wall", 1, undefined, undefined, 0);
 }
 
 function draw() {
@@ -207,6 +230,7 @@ function draw() {
   enemies.forEach(enemy => enemy.draw());
   enemies.forEach(enemy => enemy.move(scarecrow || player));
   adjust();
+  drawSky();
   drawHealthBar();
   updateTimer();
   updateScarecrow();
@@ -249,7 +273,7 @@ function pushOff(c1, c2) {
 }
 
 function mouseClicked() {
-  if (!scarecrow & (time - cooldown > 10)) {
+  if (!scarecrow & (time - scarecrowCooldown > 10)) {
     scarecrow = new mainCharacter(player.x, player.y, "white", 10, 0);
     scarecrow.ttl = frameRate() * 5;
   }
