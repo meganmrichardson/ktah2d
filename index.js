@@ -16,8 +16,8 @@ function drawHealthBar() {
     textSize(40);
     textStyle(BOLD);
     fill(0);
-    text("GAME OVER", width / 2 - 20, height / 2 - 20);
-    text(`${Math.round(time)} seconds`, width / 2 - 20, height / 2 + 20);
+    text("GAME OVER", width / 2, height / 2 - 20);
+    text(`${Math.round(time)} seconds`, width / 2, height / 2 + 20);
     exit();
   }
 }
@@ -42,7 +42,12 @@ function updateScarecrow() {
     }
   } else {
     fill("white");
-    rect(10, 10, time - scarecrowCooldown < 10 ? 15 * (time - scarecrowCooldown) : 150, 10);
+    rect(
+      10,
+      10,
+      time - scarecrowCooldown < 10 ? 15 * (time - scarecrowCooldown) : 150,
+      10
+    );
     if (time - scarecrowCooldown > 10) {
       fill("grey");
       textSize(15);
@@ -53,17 +58,30 @@ function updateScarecrow() {
 }
 
 class healthbox {
-  constructor(x, y) {
-    Object.assign(this, {x, y});
+  constructor(x, y, index) {
+    Object.assign(this, { x, y, index });
   }
   update() {
-    ellipse(this.x, this.y, 200, 200);
+    fill("white");
+    ellipse(this.x, this.y, 20, 20);
+    fill("red");
+    rect(this.x - 8, this.y - 3, 16, 6);
+    rect(this.x - 3, this.y - 8, 6, 16);
     let [dx, dy] = [this.x - player.x, this.y - player.y];
     const distance = Math.hypot(dx, dy);
-    let overlap = 200 + player.radius - distance;
+    let overlap = 20 + player.radius - distance;
     if (overlap > 0) {
-      
+      playerHealth = playerHealth > 90 ? 100 : playerHealth + 10;
+      healthboxes.splice(this.index, 1);
+      healthboxes.forEach(box => {
+        if (box.index > this.index) {
+          box.subtract();
+        }
+      });
     }
+  }
+  subtract() {
+    this.index--;
   }
 }
 
@@ -207,12 +225,6 @@ function addEnemy(
   }
 }
 
-function drawSky(){
-  let wallHeight = 0;
-  fill("black");
-  rect(0, 0, width, time * 3);
-}
-
 function setup() {
   createCanvas(800, 600);
   noStroke();
@@ -220,7 +232,6 @@ function setup() {
   addEnemy("shark", 1, [300, 300], 30, 0.01);
   addEnemy("starfish", 3, [100, 100], 15, 0.03);
   addEnemy("jellyfish", 1, [500, 500], 15, 0.035);
-  addEnemy("wall", 1, undefined, undefined, 0);
 }
 
 function draw() {
@@ -229,8 +240,8 @@ function draw() {
   player.move({ x: mouseX, y: mouseY });
   enemies.forEach(enemy => enemy.draw());
   enemies.forEach(enemy => enemy.move(scarecrow || player));
+  healthboxes.forEach(box => box.update());
   adjust();
-  drawSky();
   drawHealthBar();
   updateTimer();
   updateScarecrow();
@@ -239,6 +250,16 @@ function draw() {
     addEnemy("shark", 1, undefined, 30);
     addEnemy("starfish");
     addEnemy("jellyfish", 1, undefined, 15);
+    if (Math.random() > 0.5) {
+      healthboxes.push(
+        new healthbox(
+          Math.random() * width,
+          Math.random() * height,
+          healthboxes.length
+        )
+      );
+      console.log(healthboxes);
+    }
   }
 }
 
