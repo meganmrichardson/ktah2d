@@ -1,9 +1,9 @@
 body {
- background-color: rgb(190,210,255);
+  background-color: rgb(35, 35, 35);
 }
 
 h1 {
-  font-family: 'Unlock', cursive;
+  font-family: "Unlock", cursive;
   color: rgb(220, 20, 10);
   font-size: 40px;
   line-height: 6px;
@@ -11,4 +11,5 @@ h1 {
 
 p {
   font-family: avenir;
+  color: white;
 }
