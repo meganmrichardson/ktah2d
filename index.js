@@ -1,6 +1,7 @@
 let playerHealth = 100;
 let backgroundImage;
 let time = 0;
+let skyHeight = 0;
 
 function drawHealthBar() {
   fill("grey");
@@ -70,18 +71,23 @@ class healthbox {
     let [dx, dy] = [this.x - player.x, this.y - player.y];
     const distance = Math.hypot(dx, dy);
     let overlap = 20 + player.radius - distance;
-    if (overlap > 0) {
+    if (this.y < skyHeight) {
+      this.delete;
+    } else if (overlap > 0) {
       playerHealth = playerHealth > 90 ? 100 : playerHealth + 10;
-      healthboxes.splice(this.index, 1);
-      healthboxes.forEach(box => {
-        if (box.index > this.index) {
-          box.subtract();
-        }
-      });
+      this.delete();
     }
   }
   subtract() {
     this.index--;
+  }
+  delete() {
+    healthboxes.splice(this.index, 1);
+    healthboxes.forEach(box => {
+      if (box.index > this.index) {
+        box.subtract();
+      }
+    });
   }
 }
 
@@ -159,13 +165,13 @@ class enemy {
         let angle = TWO_PI / points;
         let halfAngle = angle / 2.0;
         beginShape();
-        for (let a = 0; a < TWO_PI; a += angle) {
-          let sx = x + cos(a) * innerRadius;
-          let sy = y + sin(a) * innerRadius;
-          vertex(sx, sy);
-          sx = x + cos(a + halfAngle) * outerRadius;
-          sy = y + sin(a + halfAngle) * outerRadius;
-          vertex(sx, sy);
+        for (let angleIndex = 0; angleIndex < TWO_PI; angleIndex += angle) {
+          let newX = x + cos(angleIndex) * innerRadius;
+          let newY = y + sin(angleIndex) * innerRadius;
+          vertex(newX, newY);
+          newX = x + cos(angleIndex + halfAngle) * outerRadius;
+          newY = y + sin(angleIndex + halfAngle) * outerRadius;
+          vertex(newX, newY);
         }
         endShape(CLOSE);
       }
@@ -214,8 +220,11 @@ let scarecrowCooldown = 0;
 function addEnemy(
   type,
   amount = 1,
-  coordinates = [Math.random() * width, Math.random() * height],
-  size = 30,
+  coordinates = [
+    Math.random() > 0.5 ? 0 : width,
+    Math.random() * (height - skyHeight) - skyHeight
+  ],
+  size = Math.random() * 20 + 10,
   speed = Math.random() * 0.03 + 0.003
 ) {
   for (let i = 0; i < amount; i++) {
@@ -225,13 +234,16 @@ function addEnemy(
   }
 }
 
+function drawSky() {
+  fill("rgb(160, 200, 255)");
+  skyHeight = time * 1.5;
+  rect(0, 0, width, skyHeight);
+}
+
 function setup() {
   createCanvas(800, 600);
   noStroke();
-  addEnemy("fish", 1, [400, 400], 10, 0.05);
-  addEnemy("shark", 1, [300, 300], 30, 0.01);
-  addEnemy("starfish", 3, [100, 100], 15, 0.03);
-  addEnemy("jellyfish", 1, [500, 500], 15, 0.035);
+  spawnEnemies();
 }
 
 function draw() {
@@ -242,25 +254,29 @@ function draw() {
   enemies.forEach(enemy => enemy.move(scarecrow || player));
   healthboxes.forEach(box => box.update());
   adjust();
+  drawSky();
   drawHealthBar();
   updateTimer();
   updateScarecrow();
   if ((Math.round(60 * time) / 60) % 10 === 0) {
-    addEnemy("fish", 1, undefined, 10);
-    addEnemy("shark", 1, undefined, 30);
-    addEnemy("starfish");
-    addEnemy("jellyfish", 1, undefined, 15);
-    if (Math.random() > 0.5) {
+    spawnEnemies();
+    if (Math.random() > 0.3) {
       healthboxes.push(
         new healthbox(
           Math.random() * width,
-          Math.random() * height,
+          Math.random() * (height - skyHeight) - skyHeight,
           healthboxes.length
         )
       );
-      console.log(healthboxes);
     }
   }
+}
+
+function spawnEnemies() {
+  addEnemy("fish", 1, undefined, 10);
+  addEnemy("shark", 1, undefined, 30);
+  addEnemy("starfish");
+  addEnemy("jellyfish", 1, undefined, 15);
 }
 
 function adjust() {
@@ -268,6 +284,15 @@ function adjust() {
   for (let i = 0; i < characters.length; i++) {
     for (let j = i + 1; j < characters.length; j++) {
       pushOff(characters[i], characters[j]);
+    }
+  }
+  if (player.y <= skyHeight + player.radius) {
+    player.y = skyHeight + player.radius;
+    playerHealth -= 0.1;
+  }
+  for (enemyIndex = 0; enemyIndex < enemies.length; enemyIndex++) {
+    if (enemies[enemyIndex].y <= skyHeight + enemies[enemyIndex].radius) {
+      enemies[enemyIndex].y = skyHeight + enemies[enemyIndex].radius;
     }
   }
 }
