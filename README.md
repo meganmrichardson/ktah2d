@@ -1,9 +1,10 @@
 # Shark Bait
 
 https://meganmrichardson.github.io/sharkbait/
+
 Created by Booker Martin and Megan Richardson
 
-A project written for CMSI 185. It is based on the zombie game K'Tah. The goal of the game is to avoid the sharks and other sea creatures for as long as possible.  
+Shark Bait is a project written for CMSI 185. It is based on the zombie game K'Tah. In the game you are a fish trying to stay alive as long as possible by avoiding the other sea creatures, the sky, and using the distraction fish and power-ups. 
 
 Some of its features include:
 
@@ -14,3 +15,4 @@ Some of its features include:
  * Timer
  * Variety of Enemy Types
  * New Enemies Introduced over Time
+ * An Expanding Sky
