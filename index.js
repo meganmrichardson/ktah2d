@@ -264,7 +264,7 @@ function draw() {
       healthboxes.push(
         new healthbox(
           Math.random() * width,
-          Math.random() * (height - skyHeight) - skyHeight,
+          Math.random() * (height - skyHeight) + skyHeight,
           healthboxes.length
         )
       );
